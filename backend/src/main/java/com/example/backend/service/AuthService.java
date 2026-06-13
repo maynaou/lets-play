@@ -59,6 +59,7 @@ public class AuthService {
     }
 
     public void login(LoginRequest loginRequest) {
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getIdentifier(), loginRequest.getPassword()));
         UserDetails user = UserDetailService.loadUserByUsername(loginRequest.getIdentifier());
