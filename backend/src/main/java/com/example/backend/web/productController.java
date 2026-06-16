@@ -1,11 +1,16 @@
 package com.example.backend.web;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,29 +28,34 @@ public class productController {
    ProductService productService;
 
    @GetMapping
-   public String getProducts() {
-      return "get products";
+   public ResponseEntity<List<ProductResponse>> getProducts() {
+      List<ProductResponse> products = productService.getProducts(); 
+      return ResponseEntity.ok(products);
    }
 
    @GetMapping("/{id}")
-   public String getProduct(@PathVariable String id) {
-      return "product by id acces public";
+   public ResponseEntity<ProductResponse> getProduct(@PathVariable String id) {
+      ProductResponse product = productService.getProduct(id); 
+      return ResponseEntity.ok(product);
    }
 
    @PostMapping
    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest productRequest, @AuthenticationPrincipal Jwt jwt) {
-      System.out.println("product name" + productRequest.getName() + " distription " + productRequest.getDescription()
-            + " price " + productRequest.getPrice());
-      // System.out.println(authentication.getName());
-
-
       String userId = jwt.getClaimAsString("userId");
-
       ProductResponse product = productService.createProduct(productRequest, userId);
-
-      System.out.println("fffffffffffffffffffffffffffffffffffffffffffffffff");
-
       return ResponseEntity.ok(product);
+   }
+
+   @PutMapping("/{id}")
+   public ResponseEntity<ProductResponse> updateProduct(@PathVariable String id, @RequestBody ProductRequest productRequest) {
+      ProductResponse product = productService.updateProduct(id, productRequest);
+      return ResponseEntity.ok(product);
+   }
+
+   @DeleteMapping("/{id}")
+   public ResponseEntity<Void> deleteProduct(@PathVariable String id) {
+          productService.deleteProduct(id);
+         return ResponseEntity.noContent().build();
    }
 
 }

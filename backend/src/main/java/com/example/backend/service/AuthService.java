@@ -67,13 +67,6 @@ public class AuthService {
 
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-
-        // String role = authentication.getAuthorities()
-        // .stream()
-        // .findFirst()
-        // .map(a -> a.getAuthority().replace("ROLE_", ""))
-        // .orElse("USER");
-
         String role = userDetails.getRole();
         String userId = userDetails.getId(); 
 
