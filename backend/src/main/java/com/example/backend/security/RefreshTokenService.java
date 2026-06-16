@@ -1,4 +1,4 @@
-package com.example.backend.service;
+package com.example.backend.security;
 
 import java.time.Instant;
 import java.util.UUID;

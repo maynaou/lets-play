@@ -17,5 +17,7 @@ public class RefreshToken {
 
     private String username;
 
+    private String role;
+
     private Instant expiryDate;
 }

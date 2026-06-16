@@ -7,7 +7,7 @@ import com.example.backend.entities.RefreshToken;
 
 
 @Repository
-public interface RefreshTokenRepository extends MongoRepository<com.example.backend.entities.RefreshToken, String> {
+public interface RefreshTokenRepository extends MongoRepository<RefreshToken, String> {
     Optional<RefreshToken> findByToken(String token);
     void deleteByUsername(String username);
     

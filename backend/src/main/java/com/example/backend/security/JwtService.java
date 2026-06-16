@@ -1,4 +1,4 @@
-package com.example.backend.service;
+package com.example.backend.security;
 
 import java.time.Instant;
 
@@ -19,21 +19,19 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long expiration;
 
-    public String generateToken(String username) {
+    public String generateToken(String username, String role, String id) {
         Instant now = Instant.now();
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .subject(username)
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiration))
-                .claim("scope", "ROLE_USER")
+                .claim("scope", "ROLE_" + role)
+                .claim( "userId", id)
                 .build();
 
-        // --- CORRECTION ICI ---
-        // On définit l'en-tête avec l'algorithme HS256 explicitement
         JwsHeader jwsHeader = JwsHeader.with(MacAlgorithm.HS256).build();
 
-        // On passe l'en-tête ET les claims (claims) aux paramètres
         return this.jwtEncoder.encode(
                 JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }

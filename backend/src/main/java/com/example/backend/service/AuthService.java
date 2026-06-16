@@ -3,16 +3,21 @@ package com.example.backend.service;
 import org.springframework.stereotype.Service;
 import com.example.backend.dto.RegisterRequest;
 import com.example.backend.repository.UserRepository;
+import com.example.backend.security.CustomUserDetails;
+import com.example.backend.security.JwtService;
+import com.example.backend.security.RefreshTokenService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.backend.entities.RefreshToken;
 import com.example.backend.entities.UserAuth;
 import com.example.backend.dto.LoginRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.authentication.AuthenticationManager;
-import com.example.backend.security.UserDetailService;
+import org.springframework.http.ResponseEntity;
+import com.example.backend.dto.LoginResponse;
+import org.springframework.security.core.Authentication;
 
 @Service
 public class AuthService {
@@ -26,15 +31,12 @@ public class AuthService {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private UserDetailService UserDetailService;
-
-    @Autowired
     private JwtService jwtService;
 
     @Autowired
     private RefreshTokenService refreshTokenService;
 
-    public String register(RegisterRequest registerRequest) {
+    public void register(RegisterRequest registerRequest) {
         System.out.println("Received registration request: " + registerRequest.getEmail() + ", "
                 + registerRequest.getUsername() + ", " + registerRequest.getPassword());
 
@@ -53,31 +55,44 @@ public class AuthService {
                 .email(registerRequest.getEmail())
                 .username(registerRequest.getUsername())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
+                .role("USER")
                 .build();
         userRepository.save(user);
-        return "Registration successful!";
     }
 
-    public void login(LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> login(LoginRequest loginRequest) {
 
-        authenticationManager.authenticate(
+        Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getIdentifier(), loginRequest.getPassword()));
-        UserDetails user = UserDetailService.loadUserByUsername(loginRequest.getIdentifier());
 
-        System.out.println("Login successful for user: " + user.getUsername());
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        String token = jwtService.generateToken(user.getUsername());
+
+        // String role = authentication.getAuthorities()
+        // .stream()
+        // .findFirst()
+        // .map(a -> a.getAuthority().replace("ROLE_", ""))
+        // .orElse("USER");
+
+        String role = userDetails.getRole();
+        String userId = userDetails.getId(); 
+
+        System.out.println(userId + " " + role + " " + userDetails.getUsername());
+
+        String token = jwtService.generateToken(authentication.getName(), role, userId);
 
         RefreshToken refreshToken =
-                refreshTokenService.createRefreshToken(loginRequest.getIdentifier());
+                refreshTokenService.createRefreshToken(authentication.getName());
 
         System.out.println("Generated JWT token: " + token);
         System.out.println("Generated refresh token: " + refreshToken.getToken());
+
+        return ResponseEntity.ok(new LoginResponse(token, refreshToken.getToken()));
     }
 
     public String refresh(String refreshToken) {
         RefreshToken token = refreshTokenService.verifyToken(refreshToken);
-        return jwtService.generateToken(token.getUsername());
+        return jwtService.generateToken(token.getUsername(), token.getRole(), token.getId());
     }
 
 
