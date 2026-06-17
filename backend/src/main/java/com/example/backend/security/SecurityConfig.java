@@ -1,5 +1,7 @@
 package com.example.backend.security;
 
+import java.time.LocalDateTime;
+
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -18,9 +20,14 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+
+import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 
@@ -40,6 +47,12 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/product").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/product/{id}").permitAll()
                         .anyRequest().authenticated())
+                // exceptionHandling(ex -> ex
+                // // ← 403 personnalisé
+                // .accessDeniedHandler(accessDeniedHandler())
+                // // ← 401 personnalisé (token manquant ou invalide)
+                // .authenticationEntryPoint(authenticationEntryPoint())
+                // )
                 .sessionManagement(sess -> sess
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2
@@ -81,5 +94,35 @@ public class SecurityConfig {
         JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
         jwtConverter.setJwtGrantedAuthoritiesConverter(converter);
         return jwtConverter;
+    }
+
+    //@Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, ex) -> {
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            response.setContentType("application/json");
+            response.getWriter().write("""
+                {
+                    "status": 403,
+                    "message": "Access denied",
+                    "timestamp": "%s"
+                }
+                """.formatted(LocalDateTime.now()));
+        };
+    }
+
+    //@Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, ex) -> {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("""
+                {
+                    "status": 401,
+                    "message": "Authentication required",
+                    "timestamp": "%s"
+                }
+                """.formatted(LocalDateTime.now()));
+        };
     }
 }

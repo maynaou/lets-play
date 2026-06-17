@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.example.backend.dto.RegisterRequest;
 import com.example.backend.dto.LoginRequest;
 import com.example.backend.service.AuthService;
+
+import jakarta.validation.Valid;
+
 import com.example.backend.dto.RegisterResponse;
 import com.example.backend.dto.LoginResponse;
 
@@ -22,8 +25,7 @@ public class AuthController {
     private AuthService authService;
     
     @PostMapping("/register")
-    public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest registerRequest) {
-        System.out.println("Received registration data: " + registerRequest.getEmail() + ", " + registerRequest.getUsername() + ", " + registerRequest.getPassword());
+    public ResponseEntity<RegisterResponse> register(@RequestBody @Valid RegisterRequest registerRequest) {
         authService.register(registerRequest);
         return ResponseEntity.status(201).body(new RegisterResponse("Registration successful!"));
     }

@@ -19,15 +19,14 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long expiration;
 
-    public String generateToken(String username, String role, String id) {
+    public String generateToken(String role, String id) {
         Instant now = Instant.now();
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .subject(username)
+                .subject(id)
                 .issuedAt(now)
                 .expiresAt(now.plusSeconds(expiration))
                 .claim("scope", "ROLE_" + role)
-                .claim( "userId", id)
                 .build();
 
         JwsHeader jwsHeader = JwsHeader.with(MacAlgorithm.HS256).build();

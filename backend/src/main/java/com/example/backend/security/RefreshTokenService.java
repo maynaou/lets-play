@@ -13,10 +13,14 @@ public class RefreshTokenService {
     @Autowired
     private RefreshTokenRepository repository;
 
-    public RefreshToken createRefreshToken(String username) {
+    public RefreshToken createRefreshToken(String role, String userId) {
+
+        System.out.println("ROLE = " + role);
+        System.out.println("USER_ID = " + userId);
 
         RefreshToken token = new RefreshToken();
-        token.setUsername(username);
+        token.setUserId(userId);
+        token.setRole(role);
         token.setToken(UUID.randomUUID().toString());
         token.setExpiryDate(Instant.now().plusSeconds(7 * 24 * 60 * 60)); // 7 days
 
@@ -36,7 +40,7 @@ public class RefreshTokenService {
         return refreshToken;
     }
 
-    public void deleteByUsername(String username) {
-        repository.deleteByUsername(username);
+    public void deleteByUserId(String userId) {
+        repository.deleteByUserId(userId);
     }
 }

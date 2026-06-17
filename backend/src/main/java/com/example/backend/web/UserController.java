@@ -25,11 +25,6 @@ public class UserController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<UserResponse>> getUsers() {
-        // System.out.println("Accessing getUsers endpoint");
-        // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        // String username = auth.getName();
-        // System.out.println("Authenticated user: " + username);
-        // System.out.println("Authorities: " + auth.getAuthorities());
         List<UserResponse> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }

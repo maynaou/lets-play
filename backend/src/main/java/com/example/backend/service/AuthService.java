@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.backend.entities.RefreshToken;
 import com.example.backend.entities.UserAuth;
+import com.example.backend.exception.EmailAlreadyExistsException;
+import com.example.backend.exception.UsernameAlreadyExistsException;
 import com.example.backend.dto.LoginRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,20 +39,15 @@ public class AuthService {
     private RefreshTokenService refreshTokenService;
 
     public void register(RegisterRequest registerRequest) {
-        System.out.println("Received registration request: " + registerRequest.getEmail() + ", "
-                + registerRequest.getUsername() + ", " + registerRequest.getPassword());
 
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            throw new RuntimeException("Email already in use");
+            throw new EmailAlreadyExistsException("Email already in use");
         }
-        ;
 
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new RuntimeException("Username already in use");
+            throw new UsernameAlreadyExistsException("Username already in use");
         }
-        ;
-        System.out.println("Registering user: " + registerRequest.getEmail() + ", " + registerRequest.getUsername()
-                + ", " + registerRequest.getPassword());
+
         UserAuth user = UserAuth.builder()
                 .email(registerRequest.getEmail())
                 .username(registerRequest.getUsername())
@@ -70,22 +67,17 @@ public class AuthService {
         String role = userDetails.getRole();
         String userId = userDetails.getId(); 
 
-        System.out.println(userId + " " + role + " " + userDetails.getUsername());
-
-        String token = jwtService.generateToken(authentication.getName(), role, userId);
+        String token = jwtService.generateToken(role, userId);
 
         RefreshToken refreshToken =
-                refreshTokenService.createRefreshToken(authentication.getName());
-
-        System.out.println("Generated JWT token: " + token);
-        System.out.println("Generated refresh token: " + refreshToken.getToken());
+                refreshTokenService.createRefreshToken(role, userId);
 
         return ResponseEntity.ok(new LoginResponse(token, refreshToken.getToken()));
     }
 
     public String refresh(String refreshToken) {
         RefreshToken token = refreshTokenService.verifyToken(refreshToken);
-        return jwtService.generateToken(token.getUsername(), token.getRole(), token.getId());
+        return jwtService.generateToken(token.getRole(), token.getUserId());
     }
 
 
