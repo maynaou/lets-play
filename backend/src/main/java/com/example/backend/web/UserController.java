@@ -5,10 +5,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import com.example.backend.service.UserService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 
 import com.example.backend.dto.UpdateUserRequest;
@@ -36,7 +40,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable String id, UpdateUserRequest updateUserRequest) {
+    public ResponseEntity<UserResponse> updateUser(@PathVariable String id,@RequestBody @Valid UpdateUserRequest updateUserRequest) {
+        System.out.println(updateUserRequest.getUsername()+ " " + updateUserRequest.getEmail() + " " + updateUserRequest.getRole());
         UserResponse user = userService.updateUser(id, updateUserRequest);
         return ResponseEntity.ok(user);
     }

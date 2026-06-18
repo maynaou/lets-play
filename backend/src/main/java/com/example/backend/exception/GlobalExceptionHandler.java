@@ -5,7 +5,6 @@ import java.util.HashMap;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,12 +59,5 @@ public class GlobalExceptionHandler {
                                 .status(HttpStatus.NOT_FOUND)
                                 .body(new ApiError("NOT_FOUND", ex.getMessage()));
         }
-
-//             @ExceptionHandler(UnauthorizedException.class)
-//     public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex) {
-//         return ResponseEntity
-//             .status(HttpStatus.UNAUTHORIZED)
-//             .body(new ErrorResponse(401, ex.getMessage()));
-//     }
 
 }

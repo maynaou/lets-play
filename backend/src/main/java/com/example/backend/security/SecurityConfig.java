@@ -1,6 +1,7 @@
 package com.example.backend.security;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -23,6 +24,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 
@@ -40,19 +44,20 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+        http     
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/product").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/product/{id}").permitAll()
                         .anyRequest().authenticated())
-                // exceptionHandling(ex -> ex
-                // // ← 403 personnalisé
-                // .accessDeniedHandler(accessDeniedHandler())
-                // // ← 401 personnalisé (token manquant ou invalide)
-                // .authenticationEntryPoint(authenticationEntryPoint())
-                // )
+                .exceptionHandling(ex -> ex
+                // ← 403 personnalisé
+                .accessDeniedHandler(accessDeniedHandler())
+                // ← 401 personnalisé (token manquant ou invalide)
+                .authenticationEntryPoint(authenticationEntryPoint())
+                )
                 .sessionManagement(sess -> sess
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2
@@ -96,7 +101,7 @@ public class SecurityConfig {
         return jwtConverter;
     }
 
-    //@Bean
+    @Bean
     public AccessDeniedHandler accessDeniedHandler() {
         return (request, response, ex) -> {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -111,7 +116,7 @@ public class SecurityConfig {
         };
     }
 
-    //@Bean
+    @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return (request, response, ex) -> {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -124,5 +129,19 @@ public class SecurityConfig {
                 }
                 """.formatted(LocalDateTime.now()));
         };
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }
