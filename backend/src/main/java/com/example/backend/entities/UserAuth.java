@@ -2,6 +2,8 @@ package com.example.backend.entities;
 
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +21,7 @@ public class UserAuth {
     @Id
     private String id;
     @Indexed(unique = true)
+    @Field("username")
     private String username;
     @Indexed(unique = true)
     private String email;
