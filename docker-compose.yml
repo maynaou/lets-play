@@ -9,6 +9,9 @@ services:
       - mongodb
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://admin:123456@mongodb:27017/mydatabase?authSource=admin
+      JWT_SECRET: ${JWT_SECRET}      
+      JWT_EXPIRATION: ${JWT_EXPIRATION}
+      SSL_KEYSTORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD}
 
   mongodb:
     image: mongo:latest
