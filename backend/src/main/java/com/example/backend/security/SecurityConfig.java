@@ -6,6 +6,7 @@ import java.util.Arrays;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,6 +25,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -41,6 +43,9 @@ public class SecurityConfig {
 
     @Value("${jwt.secret}")
     private String secret;
+    
+    @Autowired
+    private RateLimitFilter rateLimitFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -49,17 +54,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/product").permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/product/{id}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
-                // ← 403 personnalisé
                 .accessDeniedHandler(accessDeniedHandler())
-                // ← 401 personnalisé (token manquant ou invalide)
                 .authenticationEntryPoint(authenticationEntryPoint())
                 )
                 .sessionManagement(sess -> sess
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class) // ← nouveau
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.decoder(jwtDecoder())
                         .jwtAuthenticationConverter(jwtAuthenticationConverter())

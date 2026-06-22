@@ -19,7 +19,7 @@ import com.example.backend.dto.ProductResponse;
 import com.example.backend.service.ProductService;
 
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/products")
 public class productController {
 
    @Autowired
