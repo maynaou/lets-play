@@ -1,10 +1,8 @@
 package com.example.backend.entities;
 
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Builder;
 import lombok.Data;
-
 import org.springframework.data.annotation.Id;
 
 @Document(collection = "product")
@@ -18,6 +16,5 @@ public class Product {
     String name;
     String description;
     double price;
-    @Indexed(unique = true)
     String userId;
 }

@@ -34,12 +34,14 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> getUser(@PathVariable String id) {
         UserResponse user = userService.getUser(id);
         return ResponseEntity.ok(user);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> updateUser(@PathVariable String id,@RequestBody @Valid UpdateUserRequest updateUserRequest) {
         System.out.println(updateUserRequest.getUsername()+ " " + updateUserRequest.getEmail() + " " + updateUserRequest.getRole());
         UserResponse user = userService.updateUser(id, updateUserRequest);
@@ -47,6 +49,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();

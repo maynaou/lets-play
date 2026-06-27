@@ -18,6 +18,8 @@ import com.example.backend.dto.ProductRequest;
 import com.example.backend.dto.ProductResponse;
 import com.example.backend.service.ProductService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/products")
 public class productController {
@@ -38,14 +40,14 @@ public class productController {
    }
 
    @PostMapping
-   public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest productRequest, @AuthenticationPrincipal Jwt jwt) {
+   public ResponseEntity<ProductResponse> createProduct(@RequestBody @Valid ProductRequest productRequest, @AuthenticationPrincipal Jwt jwt) {
       ProductResponse product = productService.createProduct(productRequest,jwt.getSubject());
       return ResponseEntity.ok(product);
    }
 
    @PutMapping("/{id}")
    @PreAuthorize("hasRole('ADMIN') or @productSecurity.isOwner(#id,authentication.name)")
-   public ResponseEntity<ProductResponse> updateProduct(@PathVariable String id, @RequestBody ProductRequest productRequest) {
+   public ResponseEntity<ProductResponse> updateProduct(@PathVariable String id, @RequestBody @Valid ProductRequest productRequest) {
       ProductResponse product = productService.updateProduct(id, productRequest);
       return ResponseEntity.ok(product);
    }

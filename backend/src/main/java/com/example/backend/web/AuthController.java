@@ -31,7 +31,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest loginRequest) {
         System.out.println("Received login data: " + loginRequest.getIdentifier() + ", " + loginRequest.getPassword() + ", " + loginRequest.getIdentifier());
         return authService.login(loginRequest);
     }

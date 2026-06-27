@@ -60,4 +60,11 @@ public class GlobalExceptionHandler {
                                 .body(new ApiError("NOT_FOUND", ex.getMessage()));
         }
 
+        @ExceptionHandler(InvalidRefreshTokenException.class)
+        public ResponseEntity<ApiError> handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
+                return ResponseEntity
+                                .status(HttpStatus.UNAUTHORIZED)
+                                .body(new ApiError("UNAUTHORIZED", ex.getMessage()));
+        }
+
 }

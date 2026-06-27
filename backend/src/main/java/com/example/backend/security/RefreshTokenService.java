@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.backend.entities.RefreshToken;
+import com.example.backend.exception.InvalidRefreshTokenException;
 import com.example.backend.repository.RefreshTokenRepository;   
 
 @Service
@@ -30,11 +31,11 @@ public class RefreshTokenService {
     public RefreshToken verifyToken(String token) {
 
         RefreshToken refreshToken = repository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+                .orElseThrow(() -> new InvalidRefreshTokenException("Invalid refresh token"));
 
         if (refreshToken.getExpiryDate().isBefore(Instant.now())) {
             repository.delete(refreshToken);
-            throw new RuntimeException("Refresh token expired");
+            throw new InvalidRefreshTokenException("Refresh token expired");
         }
 
         return refreshToken;

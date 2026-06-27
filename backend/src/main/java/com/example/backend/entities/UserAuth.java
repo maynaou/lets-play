@@ -13,8 +13,6 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 
 @Document(collection = "users")
-@NoArgsConstructor
-@AllArgsConstructor
 @Data
 @Builder
 public class UserAuth {
